@@ -12,4 +12,21 @@ struct integral_constant
     static constexpr T value = v;
 };
 
+using true_type = integral_constant<bool, true>;
+
+using false_type = integral_constant<bool, false>;
+
+template <typename T> struct is_integral : false_type {};
+template <> struct is_integral<bool> : true_type {};
+
+template <typename T> struct is_floating_point : false_type {};
+template <> struct is_floating_point<float> : true_type {};
+template <> struct is_floating_point<double> : true_type {};
+template <> struct is_floating_point<long double> : true_type {};
+
+template <typename T>
+struct is_arithmetic : std::integral_constant<bool,
+                                       std::is_integral<T>::value ||
+                                       std::is_floating_point<T>::value> {};
+
 }
