@@ -1,6 +1,6 @@
 #pragma once
 
-namespace std
+namespace libcpp
 {
 
 class control_block

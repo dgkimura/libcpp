@@ -1,6 +1,6 @@
 #pragma once
 
-namespace std
+namespace libcpp
 {
 
 // Represents a value known at compile-time as a type.
@@ -25,8 +25,8 @@ template <> struct is_floating_point<double> : true_type {};
 template <> struct is_floating_point<long double> : true_type {};
 
 template <typename T>
-struct is_arithmetic : std::integral_constant<bool,
-                                       std::is_integral<T>::value ||
-                                       std::is_floating_point<T>::value> {};
+struct is_arithmetic : integral_constant<bool,
+                                         is_integral<T>::value ||
+                                         is_floating_point<T>::value> {};
 
 }
