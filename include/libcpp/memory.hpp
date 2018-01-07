@@ -3,11 +3,10 @@
 namespace libcpp
 {
 
-class control_block
+struct control_block
 {
-private:
-    long _strong_count;
-    long _weak_count;
+    long strong_count;
+    long weak_count;
 };
 
 template <typename T>
@@ -18,6 +17,16 @@ public:
         : _ptr(ptr),
           _count(new control_block())
     {
+    }
+
+    T* get()
+    {
+        return _ptr;
+    }
+
+    long use_count()
+    {
+        return _count->strong_count;
     }
 
 private:
