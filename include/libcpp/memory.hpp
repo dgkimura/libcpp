@@ -17,6 +17,7 @@ public:
         : _ptr(ptr),
           _count(new control_block())
     {
+        _count->strong_count += 1;
     }
 
     T* get()
@@ -27,6 +28,16 @@ public:
     long use_count()
     {
         return _count->strong_count;
+    }
+
+    ~shared_ptr()
+    {
+        _count->strong_count -= 1;
+        if (_count->strong_count <= 0)
+        {
+            delete _count;
+            delete _ptr;
+        }
     }
 
 private:
