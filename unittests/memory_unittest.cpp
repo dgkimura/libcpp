@@ -30,3 +30,22 @@ TEST(MemoryTest, testSharedPtrDeletesAllocatedMemoryAfterStrongCountDropsToZero)
     }
     ASSERT_TRUE(is_destroyed);
 }
+
+TEST(MemoryTest, testSharedPtrCopyConstructorIncrementsCount)
+{
+    libcpp::shared_ptr<int> p1(nullptr);
+    libcpp::shared_ptr<int> p2 = p1;
+
+    ASSERT_EQ(p1.use_count(), 2);
+    ASSERT_EQ(p2.use_count(), 2);
+}
+
+TEST(MemoryTest, testSharedPtrAssignmentOperatorIncrementsCount)
+{
+    libcpp::shared_ptr<int> p1(nullptr);
+    libcpp::shared_ptr<int> p2(nullptr);
+    p2 = p1;
+
+    ASSERT_EQ(p1.use_count(), 2);
+    ASSERT_EQ(p2.use_count(), 2);
+}
