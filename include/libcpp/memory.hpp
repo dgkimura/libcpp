@@ -75,6 +75,12 @@ template <typename T>
 class shared_ptr
 {
 public:
+    shared_ptr()
+        : _ptr(nullptr),
+          _count(new control_block())
+    {
+    }
+
     shared_ptr(T* ptr)
         : _ptr(ptr),
           _count(new control_block())
@@ -125,6 +131,76 @@ private:
             delete _ptr;
         }
     }
+
+    // Allow weak_ptr to share private member variable _count.
+    template <typename _T> friend class weak_ptr;
+};
+
+template <typename T>
+class weak_ptr
+{
+public:
+    weak_ptr()
+        : _ptr(nullptr),
+          _count(new control_block())
+    {
+    }
+
+    weak_ptr(T* ptr)
+        : _ptr(ptr),
+          _count(new control_block())
+    {
+    }
+
+    weak_ptr(shared_ptr<T> ptr)
+        : _ptr(ptr.get()),
+          _count(ptr._count)
+    {
+    }
+
+    weak_ptr(const weak_ptr<T>& rhs)
+    {
+        _count->weak_count -= 1;
+        rhs._count->weak_count += 1;
+        _count = rhs._count;
+    }
+
+    weak_ptr<T>& operator=(const weak_ptr<T>& rhs)
+    {
+        _count->weak_count -= 1;
+        rhs._count->weak_count += 1;
+        _count = rhs._count;
+
+        return *this;
+    }
+
+    T* get()
+    {
+        return _ptr;
+    }
+
+    long use_count()
+    {
+        return _count->strong_count;
+    }
+
+    bool expired()
+    {
+        return use_count() == 0;
+    }
+
+    shared_ptr<T> lock()
+    {
+        return expired() ? shared_ptr<T>() : shared_ptr<T>(_ptr);
+    }
+
+    ~weak_ptr()
+    {
+    }
+
+private:
+    T* _ptr;
+    control_block* _count;
 };
 
 }

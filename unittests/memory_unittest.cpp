@@ -102,3 +102,19 @@ TEST(MemoryTest, testUniquePtrCanSwitchOwnershipToAnotherUniquePtr)
     // Obect should now be destroyed because p1 is now out of scope.
     ASSERT_TRUE(is_destroyed);
 }
+
+TEST(MemoryTest, testWeakPtrStrongCountIsZero)
+{
+    libcpp::weak_ptr<int> p(nullptr);
+
+    ASSERT_EQ(p.use_count(), 0);
+}
+
+TEST(MemoryTest, testWeakPtrLockCreatesSharedPtrAndIncrementsStrongCount)
+{
+    libcpp::weak_ptr<int> wp = libcpp::shared_ptr<int>();
+    libcpp::shared_ptr<int> sp = wp.lock();
+
+    ASSERT_EQ(wp.use_count(), 1);
+    ASSERT_EQ(sp.use_count(), 1);
+}
