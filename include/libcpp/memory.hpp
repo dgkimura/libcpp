@@ -3,6 +3,56 @@
 namespace libcpp
 {
 
+template <typename T>
+class unique_ptr
+{
+public:
+    unique_ptr()
+        : _ptr(nullptr)
+    {
+    }
+
+    unique_ptr(T* ptr)
+        : _ptr(ptr)
+    {
+    }
+
+    unique_ptr(const unique_ptr<T>& rhs) = delete;
+
+    unique_ptr<T>& operator=(const unique_ptr<T>& rhs) = delete;
+
+    unique_ptr<T>& operator=(unique_ptr<T>&& rhs)
+    {
+        swap(rhs);
+        return *this;
+    }
+
+    T* get()
+    {
+        return _ptr;
+    }
+
+    void release()
+    {
+        _ptr = nullptr;
+    }
+
+    void swap(unique_ptr& other)
+    {
+        T* t = other._ptr;
+        other._ptr = _ptr;
+        _ptr = t;
+    }
+
+    ~unique_ptr()
+    {
+        delete _ptr;
+    }
+
+private:
+    T* _ptr;
+};
+
 struct control_block
 {
     long strong_count;

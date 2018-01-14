@@ -60,3 +60,45 @@ TEST(MemoryTest, testSharedPtrReferenceDecrementsWhenInstanceIsOutOfScope)
 
     ASSERT_EQ(p1.use_count(), 1);
 }
+
+TEST(MemoryTest, testUniquePtrDeletesAllocatedMemoryAfterGoingOutOfScope)
+{
+    struct Object
+    {
+        Object(bool& is_destroyed) : is_destroyed(is_destroyed) {}
+        ~Object(){ is_destroyed = true; }
+        bool& is_destroyed;
+    };
+
+    bool is_destroyed = false;
+    {
+        libcpp::unique_ptr<Object> p(new Object(is_destroyed));
+    }
+    ASSERT_TRUE(is_destroyed);
+}
+
+TEST(MemoryTest, testUniquePtrCanSwitchOwnershipToAnotherUniquePtr)
+{
+    struct Object
+    {
+        Object(bool& is_destroyed) : is_destroyed(is_destroyed) {}
+        ~Object(){ is_destroyed = true; }
+        bool& is_destroyed;
+    };
+
+    bool is_destroyed = false;
+    {
+        libcpp::unique_ptr<Object> p1;
+        {
+            libcpp::unique_ptr<Object> p2(new Object(is_destroyed));
+            p1 = std::move(p2);
+
+            // Object should not be destoyed yet because it is now owned by p1
+            // which is still in scope.
+            ASSERT_FALSE(is_destroyed);
+        }
+    }
+
+    // Obect should now be destroyed because p1 is now out of scope.
+    ASSERT_TRUE(is_destroyed);
+}
