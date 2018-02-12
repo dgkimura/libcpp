@@ -58,6 +58,8 @@ struct control_block
     long strong_count;
     long weak_count;
 
+    control_block() : strong_count(0), weak_count(0) {}
+
     long increment()
     {
         strong_count += 1;
@@ -72,6 +74,9 @@ struct control_block
 };
 
 template <typename T>
+class weak_ptr;
+
+template <typename T>
 class shared_ptr
 {
 public:
@@ -84,6 +89,13 @@ public:
     shared_ptr(T* ptr)
         : _ptr(ptr),
           _count(new control_block())
+    {
+        _count->increment();
+    }
+
+    shared_ptr(weak_ptr<T> rhs)
+        : _ptr(rhs.get()),
+          _count(rhs._count)
     {
         _count->increment();
     }
@@ -156,11 +168,11 @@ public:
         : _ptr(ptr.get()),
           _count(ptr._count)
     {
+        ptr._count->weak_count += 1;
     }
 
     weak_ptr(const weak_ptr<T>& rhs)
     {
-        _count->weak_count -= 1;
         rhs._count->weak_count += 1;
         _count = rhs._count;
     }
@@ -201,6 +213,24 @@ public:
 private:
     T* _ptr;
     control_block* _count;
+
+    // Allow shared_ptr to share private member variable _count.
+    template <typename _T> friend class shared_ptr;
+};
+
+template <typename T>
+class enable_shared_from_this
+{
+public:
+
+    shared_ptr<T> shared_from_this()
+    {
+        return shared_ptr<T>(_weak_this);
+    }
+
+private:
+
+    weak_ptr<T> _weak_this;
 };
 
 }
