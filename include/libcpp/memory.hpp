@@ -93,7 +93,7 @@ public:
         _count->increment();
     }
 
-    shared_ptr(weak_ptr<T> rhs)
+    shared_ptr(const weak_ptr<T> rhs)
         : _ptr(rhs.get()),
           _count(rhs._count)
     {
@@ -172,9 +172,13 @@ public:
     }
 
     weak_ptr(const weak_ptr<T>& rhs)
+        : _ptr(rhs._ptr),
+          _count(rhs._count)
     {
-        rhs._count->weak_count += 1;
-        _count = rhs._count;
+        if (rhs._count)
+        {
+            rhs._count->weak_count += 1;
+        }
     }
 
     weak_ptr<T>& operator=(const weak_ptr<T>& rhs)
@@ -203,7 +207,13 @@ public:
 
     shared_ptr<T> lock()
     {
-        return expired() ? shared_ptr<T>() : shared_ptr<T>(_ptr);
+        if (expired())
+        {
+            return nullptr;
+        }
+        shared_ptr<T> result(_ptr);
+        result._count = _count;
+        return result;
     }
 
     ~weak_ptr()
