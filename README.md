@@ -11,5 +11,5 @@ generate MakeFiles for this project.
 ```
 $ mkdir build && cd build
 $ cmake ..
-$ make
+$ make && unittests/all_unittests
 ```
